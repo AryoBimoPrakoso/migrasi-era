@@ -5,6 +5,7 @@ Dependencies
 Konfigurasi Sensitif
 
 .env
+firebase-adminsdk.json
 
 Log files
 
