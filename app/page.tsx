@@ -10,6 +10,7 @@ export default function Home() {
       <Hero/>
       <About/>
       <Service/>
+      <hr className="m-14"/>
       <Footer/>
     </div>
   );
