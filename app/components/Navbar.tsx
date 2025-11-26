@@ -11,9 +11,9 @@ const Navbar = () => {
       <div className="flex px-14 py-2 justify-between items-center">
         <Image src={EraBanyuLogo} alt="Era Banyu Segara"  className="w-[250px]"/>
         <div className="flex gap-5 text-[20px]">
-          <Link href="/">Beranda</Link>
-          <Link href="/">Tentang</Link>
-          <Link href="/">Produk</Link>
+          <Link href="/" className="hover:opacity-75">Beranda</Link>
+          <Link href="/" className="hover:opacity-75">Tentang</Link>
+          <Link href="/produk" className="hover:opacity-75">Produk</Link>
         </div>
       </div>
     </div>
