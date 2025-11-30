@@ -12,8 +12,9 @@ const Navbar = () => {
         <Image src={EraBanyuLogo} alt="Era Banyu Segara"  className="w-[250px]"/>
         <div className="flex gap-5 text-[20px]">
           <Link href="/" className="hover:opacity-75">Beranda</Link>
-          <Link href="/" className="hover:opacity-75">Tentang</Link>
+          <Link href="/#tentang-kami" className="hover:opacity-75">Tentang</Link>
           <Link href="/produk" className="hover:opacity-75">Produk</Link>
+          <Link href="/FAQ" className="hover:opacity-75">FAQ</Link>
         </div>
       </div>
     </div>

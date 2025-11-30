@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import ikonChatbot from "@/public/assets/img/chat.png";
@@ -28,6 +27,7 @@ const Chatbot = () => {
       time: "05:30 PM",
     },
   ]);
+
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -36,7 +36,6 @@ const Chatbot = () => {
 
   const sendMessage = () => {
     if (!input.trim()) return;
-
     setMessages([
       ...messages,
       {
@@ -49,16 +48,15 @@ const Chatbot = () => {
         }),
       },
     ]);
-
     setInput("");
   };
 
   return (
-    <div className="fixed flex items-end gap-4 bottom-0 right-0 mb-8 mr-8">
+    <div className="fixed flex items-end gap-4 bottom-0 right-0 mb-8 mr-8 z-50 pointer-events-none">
       {/* UI ChatBot */}
       <div
-        className={`mt-4 w-[350px] h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col border ${
-          chat ? "opacity-100 duration-300" : "opacity-0 duration-300"
+        className={`mt-4 w-[350px] h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col border pointer-events-auto transition-all duration-300 ${
+          chat ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
         {/* Header */}
@@ -98,7 +96,6 @@ const Chatbot = () => {
               </div>
             </div>
           ))}
-
           <div ref={bottomRef} />
         </div>
 
@@ -123,7 +120,7 @@ const Chatbot = () => {
       {/* Button chatbot */}
       <button
         onClick={() => setChat(!chat)}
-        className="cursor-pointer hover:brightness-75 duration-300 "
+        className="cursor-pointer hover:brightness-75 duration-300 pointer-events-auto"
       >
         <Image
           src={ikonChatbot}
