@@ -1,16 +1,14 @@
 import Image from "next/image";
 import Hero from "./components/Hero";
 import About from "./components/About";
-import Service from "./components/Service";
 import Footer from "./components/Footer";
+import Product from "./components/Product";
 
 export default function Home() {
   return (
-    <div className="">
+    <div className="overflow-hidden">
       <Hero/>
       <About/>
-      <Service/>
-      <hr className="m-14"/>
       <Footer/>
     </div>
   );

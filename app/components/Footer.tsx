@@ -9,8 +9,8 @@ import lokasiLogo from "@/public/assets/svg/lokasi.svg"
 
 const Footer = () => {
   return (
-    <div className="w-full">
-      <div className="flex justify-between p-14">
+    <div className="w-full font-light bg-[#F2F0EF]">
+      <div className="flex justify-between px-14 py-8">
           <div className="flex flex-col gap-5">
               <Image src={EraBanyuLogo} alt="Era Banyu Segara" className="w-56"/>
               <ul className="flex flex-col gap-4">
