@@ -1,32 +1,33 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local"; 
 import "./globals.css";
-import localFont from "next/font/local";  
 
 // Komponen 
-import Navbar from "./components/Navbar";
-import Chatbot from "./components/Chatbot";
-import Footer from "./components/Footer";
+
+import Navbar from "../components/client/Navbar";
+import Chatbot from "../components/client/Chatbot";
+import Footer from "../components/client/Footer";
 
 
 const helveticaNow = localFont({
   src:[
     {
-      path: './font/HelveticaNowDisplay-Light.ttf',
+      path: '../../public/font/HelveticaNowDisplay-Light.ttf',
       weight: '300',
       style: 'normal',
     },
     {
-      path: './font/HelveticaNowDisplay-Regular.ttf',
+      path: '../../public/font/HelveticaNowDisplay-Regular.ttf',
       weight: '400',
       style: 'normal',
     },
     {
-      path: './font/HelveticaNowDisplay-Medium.ttf',
+      path: '../../public/font/HelveticaNowDisplay-Medium.ttf',
       weight: '500',
       style: 'normal',
     },
     {
-      path: './font/HelveticaNowDisplay-Bold.ttf',
+      path: '../../public/font/HelveticaNowDisplay-Bold.ttf',
       weight: '700',
       style: 'normal',
     },
@@ -40,15 +41,15 @@ export const metadata: Metadata = {
 };
 
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{scrollBehavior:'smooth'}}>
-      <body
-        className={`${helveticaNow.className}`}
+    <html lang="en">
+      <body className={`${helveticaNow.className}`}
       >
         <Navbar/>
         {children}

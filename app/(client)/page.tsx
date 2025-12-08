@@ -1,6 +1,6 @@
 "use client"
-import Hero from "./components/Hero";
-import About from "./components/About";
+import Hero from "../components/client/Hero";
+import About from "../components/client/About";
 import { useEffect } from "react";
 
 export default function Home() {
