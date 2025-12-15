@@ -1,48 +1,36 @@
-/**
- * Express Router untuk mengelola rute pesanan (orders) yang difokuskan pada operasi Admin.
- * Semua rute ini memerlukan otentikasi (verifyToken) dan otorisasi (verifyAdmin/verifySuperAdmin).
- */
+// src/routes/orderRoutes.js
+
 const express = require('express');
 const router = express.Router();
+
+// Import Controller
 const orderController = require('../controllers/orderController');
 
-// Asumsi: authMiddleware menyediakan verifikasi token dasar, verifikasi peran Admin, dan SuperAdmin
-// Pastikan path ke middleware sudah benar
-const { verifyToken, verifyAdmin, verifySuperAdmin } = require('../middleware/authMiddleware'); 
+// PENTING: Import middleware
+const { verifyAdmin, authorizeRoles } = require('../middleware/authMiddleware');
 
-// ===================================
-// ADMIN ROUTES (PROTECTED) - PREFIX: /api/v1/admin/orders
-// ===================================
+const OPERATIONAL_ROLES = ['SuperAdmin', 'editor'];
+const SUPERADMIN_ROLE = ['SuperAdmin'];
 
-// 1. Input Manual Pesanan BARU 
-// POST /
-// Fungsi: createManualOrder, mencakup stok keluar jika statusnya Diproses/Selesai
-router.post('/', verifyToken, verifyAdmin, orderController.createManualOrder);
+// All routes require admin auth
+router.use(verifyAdmin);
 
-// 2. Ambil Semua Pesanan (Dapat difilter berdasarkan status & export ke Excel)
-// GET /
-// Fungsi: getAllOrders
-router.get('/', verifyToken, verifyAdmin, orderController.getAllOrders);
+// GET /api/v1/admin/orders - Get all orders
+router.get('/', authorizeRoles(...OPERATIONAL_ROLES), orderController.getAllOrders);
 
-// 3. Ambil Detail Satu Pesanan 
-// GET /:id
-// Fungsi: getOrderById
-router.get('/:id', verifyToken, verifyAdmin, orderController.getOrderById);
+// GET /api/v1/admin/orders/:id - Get order by ID
+router.get('/:id', authorizeRoles(...OPERATIONAL_ROLES), orderController.getOrderById);
 
-// 4. Update Detail Pesanan (Non-Status: Nama, Kontak, Detail Produk, Biaya Kirim, Tanggal)
-// PUT /:id
-// Fungsi: updateOrder (Perhitungan total & detail diurus di controller)
-router.put('/:id', verifyToken, verifyAdmin, orderController.updateOrder); 
+// POST /api/v1/admin/orders - Create new order
+router.post('/', orderController.validateCreateOrder, authorizeRoles(...OPERATIONAL_ROLES), orderController.createOrder);
 
-// 5. Update Status Pesanan SAJA (Termasuk Logika Pemotongan/Pengembalian Stok)
-// PATCH /:id/status
-// Fungsi: updateOrderStatus
-router.patch('/:id/status', verifyToken, verifyAdmin, orderController.updateOrderStatus);
+// PUT /api/v1/admin/orders/:id - Update order
+router.put('/:id', authorizeRoles(...OPERATIONAL_ROLES), orderController.updateOrder);
 
-// 6. Hapus Pesanan (HARUS status Pending atau Batal, memerlukan otorisasi SuperAdmin)
-// DELETE /:id
-// Fungsi: deleteOrder
-router.delete('/:id', verifyToken, verifySuperAdmin, orderController.deleteOrder); 
+// DELETE /api/v1/admin/orders/:id - Delete order
+router.delete('/:id', authorizeRoles(...SUPERADMIN_ROLE), orderController.deleteOrder);
 
+// GET /api/v1/admin/orders/export/excel - Export to Excel
+router.get('/export/excel', authorizeRoles(...OPERATIONAL_ROLES), orderController.exportOrdersToExcel);
 
 module.exports = router;

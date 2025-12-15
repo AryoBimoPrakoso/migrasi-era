@@ -21,7 +21,7 @@ const generateToken = (payload) => {
         throw new InternalServerError('Kesalahan Server: Kunci rahasia JWT tidak ditemukan.');
     }
     // Menggunakan process.env.JWT_SECRET untuk keamanan
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' }); 
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
 };
 
 

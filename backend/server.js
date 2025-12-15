@@ -10,19 +10,28 @@ const { Server } = require("socket.io");
 // Load environment variables dari file .env
 dotenv.config();
 
+// Validate environment variables
+const { logEnvironmentStatus } = require('./src/utils/envCheck');
+const envValidation = logEnvironmentStatus();
+
+if (!envValidation.isValid) {
+    console.error('❌ Server cannot start due to missing required environment variables');
+    process.exit(1);
+}
+
 // --- PENTING: INISIALISASI & AMBIL INSTANCE DB ---
 // dbConfig berisi { db, admin, auth }. Memastikan DB diinisialisasi sekali.
-const dbConfig = require('./src/config/db'); 
+const dbConfig = require('./src/config/db');
 const db = dbConfig.db; // Instance Firestore
 const auth = dbConfig.auth; // Instance Auth
 
 // --- IMPORT ROUTES ---
 // Pastikan semua rute yang akan digunakan diimpor
-const authRoutes = require('./src/routes/authRoutes'); 
-const productRoutes = require('./src/routes/productRoutes'); 
-const orderRoutes = require('./src/routes/orderRoutes'); 
+const authRoutes = require('./src/routes/authRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
 const adminRoutes = require('./src/routes/adminRoutes'); // Rute Admin Umum
-const inventoryRoutes = require('./src/routes/inventoryRoutes'); 
+const inventoryRoutes = require('./src/routes/inventoryRoutes');
 
 // --- IMPORT MIDDLEWARE ---
 // Pastikan verifyToken juga diimpor, meskipun hanya verifyAdmin yang digunakan di level global
@@ -32,17 +41,17 @@ const { notFound, errorHandler } = require('./src/middleware/errorMiddleware');
 
 // 2. Inisialisasi Express
 const app = express();
-const PORT = process.env.PORT || 5000; 
+const PORT = process.env.PORT || 5000;
 
 // 3. Konfigurasi Middleware Global
-app.use(cors({ 
+app.use(cors({
     // Atur CORS agar aman di lingkungan produksi
-    origin: process.env.CORS_ORIGIN || '*', 
+    origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    credentials: true 
-})); 
-app.use(express.json()); // Middleware untuk parsing body JSON
-app.use(express.urlencoded({ extended: true })); // Middleware untuk parsing form data
+    credentials: true
+}));
+app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' })); // Middleware untuk parsing body JSON dengan limit besar untuk base64
+app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' })); // Middleware untuk parsing form data
 
 
 // 4. Rute Sederhana (Contoh Test)

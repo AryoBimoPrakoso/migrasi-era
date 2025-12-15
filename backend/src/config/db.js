@@ -15,12 +15,13 @@ if (!admin.apps.length) {
     try {
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
+            storageBucket: 'erabanyu-31482.appspot.com'
         });
         console.log("Firebase Admin SDK berhasil diinisialisasi.");
     } catch (error) {
         console.error("Gagal menginisialisasi Firebase Admin SDK:", error.message);
         // Penting: Keluar dari proses jika inisialisasi DB gagal total
-        // process.exit(1); 
+        // process.exit(1);
     }
 }
 

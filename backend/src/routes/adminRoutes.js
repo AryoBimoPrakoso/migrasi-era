@@ -30,9 +30,6 @@ const OPERATIONAL_ROLES = ['SuperAdmin', 'editor'];
 // ===========================================
 
 // 1. Ambil semua pesanan (GET /api/v1/admin/orders)
-router.get('/orders', authorizeRoles(...OPERATIONAL_ROLES), orderController.getAllOrders); 
-
-// 2. Update Status Pesanan (PATCH /api/v1/admin/orders/:id/status)
-router.patch('/orders/:id/status', authorizeRoles(...OPERATIONAL_ROLES), orderController.updateOrderStatus);
+router.get('/orders', authorizeRoles(...OPERATIONAL_ROLES), orderController.getAllOrders);
 
 module.exports = router;

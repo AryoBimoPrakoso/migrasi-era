@@ -1,8 +1,12 @@
 // src/controllers/productController.js
 
-const { db, admin } = require('../config/db'); 
-const { NotFoundError, BadRequestError } = require('../utils/customError'); 
+const { db, admin } = require('../config/db');
+const { NotFoundError, BadRequestError } = require('../utils/customError');
+const { body, validationResult } = require('express-validator');
+const { getStorage } = require('firebase-admin/storage');
 const PRODUCT_COLLECTION = 'products';
+
+const bucket = getStorage().bucket();
 
 // ===================================
 // PUBLIC API: GET /api/v1/products
@@ -34,11 +38,27 @@ exports.getPublicProducts = async (req, res, next) => {
 // ADMIN API: CRUD (Membutuhkan Token)
 // ===================================
 
+// Validation middleware for createProduct
+exports.validateCreateProduct = [
+    body('name').notEmpty().withMessage('Nama produk wajib diisi').isLength({ min: 2 }).withMessage('Nama produk minimal 2 karakter'),
+    body('sku').notEmpty().withMessage('SKU wajib diisi').isLength({ min: 3 }).withMessage('SKU minimal 3 karakter'),
+    body('minOrderQuantity').isInt({ min: 1 }).withMessage('Kuantitas minimum order harus angka positif'),
+    body('unit').notEmpty().withMessage('Unit wajib diisi'),
+    body('price').isFloat({ min: 0 }).withMessage('Harga harus angka positif'),
+    body('currentStock').optional().isInt({ min: 0 }).withMessage('Stock harus angka non-negatif'),
+    body('minStockLevel').optional().isInt({ min: 0 }).withMessage('Minimum stock level harus angka non-negatif'),
+];
+
 // 1. CREATE: POST /api/v1/admin/products
 /**
  * Membuat produk baru di Firestore.
  */
 exports.createProduct = async (req, res, next) => {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new BadRequestError('Validation failed: ' + errors.array().map(err => err.msg).join(', ')));
+    }
     const { 
         name, 
         sku, 
@@ -92,15 +112,18 @@ exports.createProduct = async (req, res, next) => {
 
         const docRef = await db.collection(PRODUCT_COLLECTION).add(newProduct);
 
-        res.status(201).json({ 
+        console.log(`[INFO] Produk baru dibuat: ${newProduct.name} (SKU: ${newProduct.sku}) oleh admin`);
+
+        res.status(201).json({
             success: true,
-            message: 'Produk berhasil ditambahkan.', 
+            message: 'Produk berhasil ditambahkan.',
             productId: docRef.id,
             // Kembalikan data dengan ID dokumen baru
-            product: { id: docRef.id, ...newProduct } 
+            product: { id: docRef.id, ...newProduct }
         });
     } catch (error) {
-        next(error); 
+        console.error(`[ERROR] Gagal membuat produk: ${error.message}`);
+        next(error);
     }
 };
 

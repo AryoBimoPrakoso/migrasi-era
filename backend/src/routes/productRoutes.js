@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import Controller
-const productController = require('../controllers/productController'); 
+const productController = require('../controllers/productController');
 
 // PENTING: Import kedua middleware untuk verifikasi token dan otorisasi peran
 const { verifyAdmin, authorizeRoles } = require('../middleware/authMiddleware'); 
@@ -34,7 +34,7 @@ router.use(verifyAdmin);
 
 // 1. CREATE: POST /api/v1/admin/products
 // Hanya SuperAdmin yang dapat membuat produk baru
-router.post('/', authorizeRoles(...OPERATIONAL_ROLES), productController.createProduct); 
+router.post('/', productController.validateCreateProduct, authorizeRoles(...OPERATIONAL_ROLES), productController.createProduct);
 
 // 2. READ All: GET /api/v1/admin/products
 // Boleh diakses oleh Admin Operasional
@@ -50,6 +50,8 @@ router.put('/:id', authorizeRoles(...SUPERADMIN_ROLE), productController.updateP
 
 // 5. DELETE: DELETE /api/v1/admin/products/:id
 // Hanya SuperAdmin yang dapat menghapus produk
-router.delete('/:id', authorizeRoles(...SUPERADMIN_ROLE), productController.deleteProduct); 
+router.delete('/:id', authorizeRoles(...SUPERADMIN_ROLE), productController.deleteProduct);
+
+// Image upload handled via base64 in product creation/update
 
 module.exports = router;
