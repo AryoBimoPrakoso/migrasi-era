@@ -42,7 +42,7 @@ const About = () => {
                   {daftarLayananArray.map((layanan, index) => (
                     <div
                       key={index}
-                      className="py-2 h-full border-b border-black/30 justify-center font-medium cursor-pointer"
+                      className="py-2 h-full border-b border-black/30 justify-center font-medium"
                     >
                       <h2 className="flex md:text-2xl text-lg items-center h-full font-light">
                         {layanan}

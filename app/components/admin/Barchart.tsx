@@ -8,44 +8,74 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  ResponsiveContainer, // Gunakan ini agar responsif mengikuti div parent
 } from "recharts";
 
 type Props = {
   data: { range: string; sales: number }[];
-  month: string;
+  title: string; // Contoh: "November 2025"
 };
 
-const Barchart = ({ data, month }: Props) => {
+const Barchart = ({ data, title }: Props) => {
   return (
-    <div>
-        <h1 className="text-xl font-medium">Grafik Penjualan - {month}</h1>
-      <BarChart
-        style={{
-          width: "100%",
-          maxWidth: "1500px",
-          maxHeight: "60vh",
-          aspectRatio: 1.618,
-        }}
-        responsive
-        data={data}
-        margin={{
-          top: 20,
-          right: 30,
-          left: 40,
-          bottom: 40,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="range" label={{position: 'bottom', value: 'Tanggal'}} />
-        <YAxis width="auto" domain={[0,100]} label={{position: 'left', offset: 10 ,value:'Jumlah Penjualan', angle: -90, dy: 60}}/>
-        <Tooltip />
-        <Bar
-          dataKey="sales"
-          fill="#0099A5"
-          activeBar={<Rectangle fill="#7bf6ffff"  />}
-        />
-      </BarChart>
+    <div className="w-full h-[450px] bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <h1 className="text-xl font-bold text-gray-800 mb-6">Grafik Penjualan Produk - {title}</h1>
+      
+      {/* Container Chart */}
+      <div className="w-full h-[350px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 60, // Tambah bottom margin untuk label produk yang panjang
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+            
+            <XAxis 
+              dataKey="range" 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              label={{ position: 'bottom', value: 'Nama Produk', offset: 0, fill: '#9ca3af' }}
+              // Jika nama produk panjang, bisa dipotong atau dirotasi
+              interval={0} 
+              angle={-15}
+              textAnchor="end"
+            />
+            
+            <YAxis 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              label={{ 
+                position: 'left', 
+                value: 'Jumlah Terjual (Unit)', 
+                angle: -90, 
+                dy: 0,
+                dx: -10,
+                fill: '#9ca3af'
+              }} 
+            />
+            
+            <Tooltip 
+              cursor={{ fill: '#f9fafb' }}
+              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+            />
+            
+            <Bar
+              dataKey="sales"
+              fill="#000000" // Warna batang hitam sesuai tema
+              radius={[4, 4, 0, 0]}
+              barSize={40}
+              activeBar={<Rectangle fill="#333333" />}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

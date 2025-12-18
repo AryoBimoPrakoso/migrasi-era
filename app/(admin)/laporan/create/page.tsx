@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { postApi } from "@/lib/apiClient"; // Kita hanya butuh postApi
-import { FaArrowLeft, FaSave } from "react-icons/fa";
+import { postApi } from "@/lib/apiClient";
+import { CircleAlert, MoveLeft, Plus } from "lucide-react";
 
 // Interface untuk Initial State
 interface OrderForm {
@@ -11,7 +11,7 @@ interface OrderForm {
   kontak: string;
   detail: string;
   jumlah: string;
-  total: string; // String agar bisa dikosongkan saat input
+  total: string;
   tanggalPesan: string;
   tanggalPembayaran: string;
   status: string;
@@ -35,7 +35,9 @@ export default function CreateLaporanPage() {
   });
 
   // Handle Perubahan Input
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -68,7 +70,6 @@ export default function CreateLaporanPage() {
 
       alert("Laporan pesanan berhasil ditambahkan!");
       router.push("/laporan"); // Kembali ke list laporan
-
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Gagal menyimpan data.");
@@ -80,13 +81,17 @@ export default function CreateLaporanPage() {
   return (
     <div className="p-6 lg:p-10 bg-gray-50 min-h-screen">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-black transition">
-            <FaArrowLeft size={20} />
+          <button
+            onClick={() => router.back()}
+            className="text-gray-500 hover:text-black transition"
+          >
+            <MoveLeft size={20} />
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">Tambah Laporan Baru</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Tambah Laporan Baru
+          </h1>
         </div>
 
         {/* Error Alert */}
@@ -99,10 +104,11 @@ export default function CreateLaporanPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             {/* Nama Pelanggan */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Nama Pelanggan <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Nama Pelanggan <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="nama"
@@ -116,7 +122,9 @@ export default function CreateLaporanPage() {
 
             {/* Kontak */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Kontak / HP <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Kontak / HP <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="kontak"
@@ -130,7 +138,9 @@ export default function CreateLaporanPage() {
 
             {/* Detail Produk */}
             <div className="md:col-span-2 space-y-1">
-              <label className="text-sm font-medium text-gray-700">Detail Produk <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Detail Produk <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="detail"
@@ -144,7 +154,9 @@ export default function CreateLaporanPage() {
 
             {/* Jumlah Pesanan */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Jumlah Pesanan <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Jumlah Pesanan <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="jumlah"
@@ -158,7 +170,9 @@ export default function CreateLaporanPage() {
 
             {/* Total Harga */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Total Harga (Rp) <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Total Harga (Rp) <span className="text-red-500">*</span>
+              </label>
               <input
                 type="number"
                 name="total"
@@ -173,7 +187,9 @@ export default function CreateLaporanPage() {
 
             {/* Tanggal Pesanan */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Tanggal Pesanan <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium text-gray-700">
+                Tanggal Pesanan <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 name="tanggalPesan"
@@ -186,7 +202,9 @@ export default function CreateLaporanPage() {
 
             {/* Tanggal Pembayaran */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Tanggal Pembayaran</label>
+              <label className="text-sm font-medium text-gray-700">
+                Tanggal Pembayaran
+              </label>
               <input
                 type="date"
                 name="tanggalPembayaran"
@@ -194,12 +212,19 @@ export default function CreateLaporanPage() {
                 onChange={handleChange}
                 className="w-full p-2.5 border border-gray-300 rounded-lg outline-none transition"
               />
-              <p className="text-xs text-gray-400">Kosongkan jika belum lunas.</p>
+              <div className="flex mt-2 py-1 px-4 bg-orange-50 rounded-md">
+                <CircleAlert className="h-4 text-orange-500"/>
+                <p className="text-xs text-orange-500">
+                  Kosongkan jika belum lunas.
+                </p>
+              </div>
             </div>
 
             {/* Status */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Status Pesanan</label>
+              <label className="text-sm font-medium text-gray-700">
+                Status Pesanan
+              </label>
               <select
                 name="status"
                 value={form.status}
@@ -209,7 +234,6 @@ export default function CreateLaporanPage() {
                 <option value="Diproses">Diproses</option>
                 <option value="Selesai">Selesai</option>
                 <option value="Batal">Batal</option>
-                <option value="Pending">Pending</option>
               </select>
             </div>
           </div>
@@ -223,10 +247,10 @@ export default function CreateLaporanPage() {
                 isLoading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              <FaSave />
-              {isLoading ? "Menyimpan..." : "Simpan Data"}
+              <Plus />
+              {isLoading ? "Menyimpan..." : "Tambah data"}
             </button>
-            
+
             <button
               type="button"
               onClick={() => router.back()}

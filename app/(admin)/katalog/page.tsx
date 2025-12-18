@@ -1,6 +1,6 @@
 "use client";
 import { deleteApi, getApi } from "@/lib/apiClient";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -79,7 +79,7 @@ const Katalog = () => {
         {/* Tombol Tambah Produk -> Mengarah ke halaman Edit/Create */}
         <Link href="/katalog/create">
           <button className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-            <FaPlus /> Tambah Produk
+            <Plus /> Tambah Produk
           </button>
         </Link>
       </div>
@@ -159,21 +159,19 @@ const Katalog = () => {
                     </td>
 
                     {/* AKSI */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-3">
-                        <Link href={`/katalog/edit/${item.id}`}>
-                          {/* Perbaikan Link Edit */}
-                          <button className="text-blue-600 hover:text-blue-800">
-                            <FaEdit size={16} />
-                          </button>
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <FaTrash size={16} />
+                    <td className="px-6 py-4 text-center flex justify-center gap-2">
+                      <Link href={`/katalog/edit/${item.id}`}>
+                        {/* Perbaikan Link Edit */}
+                        <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                          <Edit size={16} />
                         </button>
-                      </div>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}

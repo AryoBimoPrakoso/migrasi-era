@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getApi, deleteApi } from "@/lib/apiClient";
-import { Plus, Download, Trash2, Edit, Filter } from "lucide-react";
+import { Plus, Download, Trash2, Edit} from "lucide-react";
 
 // Komponen filter
 import MonthFilter from "@/app/components/admin/MonthFilter";
