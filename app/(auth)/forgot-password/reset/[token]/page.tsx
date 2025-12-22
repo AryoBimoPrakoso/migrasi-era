@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { postApi } from '@/lib/apiClient';
 
-// Komponen form utama dibungkus terpisah agar bisa menggunakan useSearchParams di dalam Suspense
+// Komponen form utama
 function ResetPasswordForm() {
-  const searchParams = useSearchParams();
-  // INI TOKEN DIAMBIL DARI URL BIASANYA SI PER 
-  const token = searchParams.get('token'); 
+  const params = useParams();
+  const token = params.token as string;
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -46,22 +46,15 @@ function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      // API NYA DISINI BOLEHH
-      // const res = await fetch('http://localhost:5000/api/auth/reset-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ token, newPassword: formData.password }),
-      // });
-
-      // INI BUAT SIMULASI AJA KLO SUKSES, SEBERNARNYA BISA JUGA SIH DIPAKE MWEHEHEHEHEH
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const newPassword = formData.password;
+      await postApi('admin/auth/reset-password', { token, newPassword });
       setSuccess(true);
-      
+
       // Redirect otomatis setelah 3 detik
       setTimeout(() => router.push('/login'), 3000);
 
-    } catch (err) {
-      setError('Gagal mereset password. Token mungkin sudah kadaluarsa.');
+    } catch (err: any) {
+      setError(err.message || 'Gagal mereset password. Token mungkin sudah kadaluarsa.');
     } finally {
       setIsLoading(false);
     }
@@ -193,10 +186,7 @@ export default function ResetPasswordPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
-          {/* Suspense diperlukan karena menggunakan useSearchParams */}
-          <Suspense fallback={<div className="text-center p-4">Loading form...</div>}>
-            <ResetPasswordForm />
-          </Suspense>
+          <ResetPasswordForm />
         </div>
       </div>
     </div>

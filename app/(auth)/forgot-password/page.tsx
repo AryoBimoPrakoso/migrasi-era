@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { postApi } from '../../../lib/apiClient';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -17,18 +18,10 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      // NIH PER BUAT API NYA YAK WKWKWKWK
-      // const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-      
-      // Simulasi sukses untuk UI
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await postApi('admin/auth/forgot-password', { email });
       setIsSubmitted(true);
-    } catch (err) {
-      setError('Gagal mengirim email. Silakan coba lagi.');
+    } catch (err: any) {
+      setError(err.message || 'Gagal mengirim email. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }

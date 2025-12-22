@@ -3,9 +3,13 @@
 const { db, admin } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Import Custom Errors
-const { BadRequestError, UnauthorizedError, InternalServerError, ForbiddenError } = require('../utils/customError'); 
+const { BadRequestError, UnauthorizedError, InternalServerError, ForbiddenError } = require('../utils/customError');
+
+// Import Email Service
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 
 // Nama koleksi untuk admin
 const ADMIN_COLLECTION = 'admins';
@@ -51,9 +55,10 @@ exports.registerFirstAdmin = async (req, res, next) => {
             username: username,
             email: email,
             passwordHash: passwordHash,
-            role: 'SuperAdmin', 
+            role: 'SuperAdmin',
+            emailVerified: true, // First admin is verified by default
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            createdByAdminId: null, 
+            createdByAdminId: null,
         };
 
         const docRef = await db.collection(ADMIN_COLLECTION).add(newAdminData);
@@ -117,27 +122,44 @@ exports.registerNewAdmin = async (req, res, next) => {
             username: username,
             email: email,
             passwordHash: passwordHash,
-            role: role, 
+            role: role,
+            emailVerified: false,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            createdByAdminId: registeringAdminId, 
+            createdByAdminId: registeringAdminId,
         };
 
         const docRef = await db.collection(ADMIN_COLLECTION).add(newAdminData);
         const adminId = docRef.id;
 
-        // 4. Buat JWT untuk Admin baru
+        // 4. Generate verification token
+        const verificationToken = jwt.sign({ id: adminId, email: email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+        // Update admin with verification token
+        await db.collection(ADMIN_COLLECTION).doc(adminId).update({
+            verificationToken: verificationToken,
+        });
+
+        // 5. Send verification email
+        try {
+            await sendVerificationEmail(email, verificationToken);
+        } catch (emailError) {
+            console.error('Failed to send verification email:', emailError);
+            // Don't fail registration if email fails, but log it
+        }
+
+        // 6. Buat JWT untuk Admin baru (but they need to verify email first)
         const payload = {
             id: adminId,
             username: newAdminData.username,
             role: newAdminData.role,
         };
         const token = generateToken(payload);
-        
-        res.status(201).json({ 
-            message: `Admin Pegawai baru (${username}) berhasil didaftarkan.`, 
+
+        res.status(201).json({
+            message: `Admin Pegawai baru (${username}) berhasil didaftarkan. Silakan verifikasi email untuk login.`,
             adminId: adminId,
             role: newAdminData.role,
-            token: token
+            token: token, // Token issued but login will check verification
         });
 
     } catch (error) {
@@ -146,6 +168,161 @@ exports.registerNewAdmin = async (req, res, next) => {
     }
 };
 
+/**
+ * Endpoint untuk Verifikasi Email Admin
+ */
+exports.verifyEmail = async (req, res, next) => {
+    const { token } = req.body;
+
+    if (!token) {
+        return next(new BadRequestError('Token verifikasi diperlukan.'));
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find admin by id
+        const adminDoc = await db.collection(ADMIN_COLLECTION).doc(decoded.id).get();
+        if (!adminDoc.exists) {
+            return next(new BadRequestError('Token tidak valid.'));
+        }
+
+        const adminData = adminDoc.data();
+
+        // Check if token matches
+        if (adminData.verificationToken !== token) {
+            return next(new BadRequestError('Token tidak valid.'));
+        }
+
+        // Update admin: set emailVerified true, remove verificationToken
+        await db.collection(ADMIN_COLLECTION).doc(decoded.id).update({
+            emailVerified: true,
+            verificationToken: admin.firestore.FieldValue.delete(),
+        });
+
+        res.status(200).json({
+            message: 'Email berhasil diverifikasi. Anda sekarang dapat login.',
+        });
+
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return next(new BadRequestError('Token verifikasi telah kedaluwarsa.'));
+        }
+        console.error('Error saat verifikasi email:', error);
+        next(new InternalServerError('Gagal memverifikasi email.'));
+    }
+};
+
+/**
+ * Endpoint untuk Forgot Password
+ */
+exports.forgotPassword = async (req, res, next) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return next(new BadRequestError('Email diperlukan.'));
+    }
+
+    try {
+        // Find admin by email
+        const snapshot = await db.collection(ADMIN_COLLECTION)
+            .where('email', '==', email)
+            .limit(1)
+            .get();
+
+        if (snapshot.empty) {
+            // Don't reveal if email exists or not for security
+            return res.status(200).json({
+                message: 'Jika email terdaftar, instruksi reset kata sandi telah dikirim.',
+            });
+        }
+
+        const adminDoc = snapshot.docs[0];
+        const adminId = adminDoc.id;
+
+        // Generate reset token
+        const resetToken = jwt.sign({ id: adminId, email: email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Update admin with reset token
+        await db.collection(ADMIN_COLLECTION).doc(adminId).update({
+            resetToken: resetToken,
+            resetTokenExpiry: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 60 * 60 * 1000)), // 1 hour
+        });
+
+        // Send reset email
+        try {
+            await sendPasswordResetEmail(email, resetToken);
+        } catch (emailError) {
+            console.error('Failed to send reset email:', emailError);
+            // Don't fail the request
+        }
+
+        res.status(200).json({
+            message: 'Jika email terdaftar, instruksi reset kata sandi telah dikirim.',
+        });
+
+    } catch (error) {
+        console.error('Error saat forgot password:', error);
+        next(new InternalServerError('Gagal memproses permintaan reset kata sandi.'));
+    }
+};
+
+/**
+ * Endpoint untuk Reset Password
+ */
+exports.resetPassword = async (req, res, next) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        return next(new BadRequestError('Token dan kata sandi baru diperlukan.'));
+    }
+
+    try {
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find admin by id
+        const adminDoc = await db.collection(ADMIN_COLLECTION).doc(decoded.id).get();
+        if (!adminDoc.exists) {
+            return next(new BadRequestError('Token tidak valid.'));
+        }
+
+        const adminData = adminDoc.data();
+
+        // Check if token matches and not expired
+        if (adminData.resetToken !== token) {
+            return next(new BadRequestError('Token tidak valid.'));
+        }
+
+        // Check expiry (though jwt already checks, but for extra safety)
+        if (adminData.resetTokenExpiry && adminData.resetTokenExpiry.toDate() < new Date()) {
+            return next(new BadRequestError('Token reset telah kedaluwarsa.'));
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        // Update admin: set new password, remove resetToken
+        await db.collection(ADMIN_COLLECTION).doc(decoded.id).update({
+            passwordHash: passwordHash,
+            resetToken: admin.firestore.FieldValue.delete(),
+            resetTokenExpiry: admin.firestore.FieldValue.delete(),
+        });
+
+        res.status(200).json({
+            message: 'Kata sandi berhasil direset. Anda dapat login dengan kata sandi baru.',
+        });
+
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return next(new BadRequestError('Token reset telah kedaluwarsa.'));
+        }
+        console.error('Error saat reset password:', error);
+        next(new InternalServerError('Gagal mereset kata sandi.'));
+    }
+};
 
 /**
  * Endpoint untuk Login Admin
@@ -168,9 +345,14 @@ exports.loginAdmin = async (req, res, next) => {
         const adminData = adminDoc.data();
         const adminId = adminDoc.id;
 
-        // 2. Bandingkan Password
+        // 2. Check if email is verified
+        if (adminData.emailVerified === false) {
+            return next(new UnauthorizedError('Email belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu.'));
+        }
+
+        // 3. Bandingkan Password
         const isMatch = await bcrypt.compare(password, adminData.passwordHash);
-        
+
         if (!isMatch) {
             return next(new UnauthorizedError('Username atau password salah.'));
         }

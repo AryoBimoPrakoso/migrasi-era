@@ -17,6 +17,15 @@ router.post('/register/first', authController.registerFirstAdmin);
 // Rute untuk Login Admin
 router.post('/login', authController.loginAdmin);
 
+// Rute untuk Verifikasi Email
+router.post('/verify-email', authController.verifyEmail);
+
+// Rute untuk Forgot Password
+router.post('/forgot-password', authController.forgotPassword);
+
+// Rute untuk Reset Password
+router.post('/reset-password', authController.resetPassword);
+
 
 // ===========================================
 // RUTE ADMIN TERPROTEKSI (Memerlukan token/middleware)
