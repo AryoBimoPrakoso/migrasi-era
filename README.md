@@ -1,6 +1,5 @@
 
-# Era Banyu - Sistem Manajemen Katalog & Laporan
-## Project PPPL Kelompok 3 4IA19
+# Era Banyu - Sistem Manajemen Katalog & Laporan - Kelompok 3 4IA19
 
 Era Banyu adalah aplikasi berbasis web yang digunakan untuk manajemen katalog produk dan pelaporan. Proyek ini dibangun menggunakan arsitektur modern dengan frontend Next.js dan backend Node.js.
 
