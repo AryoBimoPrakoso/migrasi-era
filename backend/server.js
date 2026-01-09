@@ -1,11 +1,16 @@
-// server.js FINAL
+// server.js FINAL - OPTIMIZED
 
 // 1. Load Dependencies
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const http = require('http'); 
-const { Server } = require("socket.io"); 
+const http = require('http');
+const { Server } = require("socket.io");
+
+// Performance & Security Middleware
+const compression = require('compression');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 // Load environment variables dari file .env
 dotenv.config();
@@ -35,8 +40,8 @@ const inventoryRoutes = require('./src/routes/inventoryRoutes');
 
 // --- IMPORT MIDDLEWARE ---
 // Pastikan verifyToken juga diimpor, meskipun hanya verifyAdmin yang digunakan di level global
-const { verifyAdmin, verifyToken } = require('./src/middleware/authMiddleware'); 
-const { notFound, errorHandler } = require('./src/middleware/errorMiddleware'); 
+const { verifyAdmin, verifyToken } = require('./src/middleware/authMiddleware');
+const { notFound, errorHandler } = require('./src/middleware/errorMiddleware');
 
 
 // 2. Inisialisasi Express
@@ -44,14 +49,58 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // 3. Konfigurasi Middleware Global
+
+// 3a. Compression - GZIP responses (reduce size 60-80%)
+app.use(compression({
+    level: 6, // Compression level (1-9, 6 is good balance)
+    threshold: 1024, // Only compress responses > 1KB
+    filter: (req, res) => {
+        // Don't compress if client doesn't support it
+        if (req.headers['x-no-compression']) {
+            return false;
+        }
+        return compression.filter(req, res);
+    }
+}));
+
+// 3b. Helmet - Security HTTP headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin for API
+    contentSecurityPolicy: false // Disable CSP for API (no HTML served)
+}));
+
+// 3c. Rate Limiting - Prevent abuse
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 300, // Limit each IP to 300 requests per window (suitable for e-commerce)
+    message: {
+        success: false,
+        error: 'Terlalu banyak permintaan. Coba lagi dalam 15 menit.',
+        status_code: 429
+    },
+    standardHeaders: true, // Return rate limit info in headers
+    legacyHeaders: false, // Disable X-RateLimit-* headers
+    skip: (req) => {
+        // Skip rate limiting for health checks
+        return req.path === '/' || req.path === '/health';
+    }
+});
+
+// Apply rate limiting to API routes
+app.use('/api/', apiLimiter);
+
+// 3d. CORS Configuration
 app.use(cors({
     // Atur CORS agar aman di lingkungan produksi
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    credentials: true
+    credentials: true,
+    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 }));
-app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' })); // Middleware untuk parsing body JSON dengan limit besar untuk base64
-app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' })); // Middleware untuk parsing form data
+
+// 3e. Body Parsing
+app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' })); // Parsing body JSON
+app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' })); // Parsing form data
 
 
 // 4. Rute Sederhana (Contoh Test)
@@ -74,7 +123,7 @@ app.use(`${API_PREFIX}/admin/auth`, authRoutes);
 
 // B. Rute Admin Terproteksi: INVENTARIS
 // Urutan: verifyToken -> authorizeRoles (implisit di verifyAdmin)
-app.use(`${API_PREFIX}/admin/inventory`, verifyAdmin, inventoryRoutes); 
+app.use(`${API_PREFIX}/admin/inventory`, verifyAdmin, inventoryRoutes);
 
 // C. Rute Admin Terproteksi: ORDERS
 app.use(`${API_PREFIX}/admin/orders`, verifyAdmin, orderRoutes);
@@ -83,11 +132,11 @@ app.use(`${API_PREFIX}/admin/orders`, verifyAdmin, orderRoutes);
 app.use(`${API_PREFIX}/products`, productRoutes);
 
 // D. Rute Admin Terproteksi: PRODUK (CRUD)
-app.use(`${API_PREFIX}/admin/products`, verifyAdmin, productRoutes); 
+app.use(`${API_PREFIX}/admin/products`, verifyAdmin, productRoutes);
 
 
 // E. Rute Admin Terproteksi Lainnya
-app.use(`${API_PREFIX}/admin`, verifyAdmin, adminRoutes); 
+app.use(`${API_PREFIX}/admin`, verifyAdmin, adminRoutes);
 
 
 // -----------------------------------------------------------
@@ -105,7 +154,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         // Menggunakan origin yang sama dengan CORS Express di atas
-        origin: process.env.CORS_ORIGIN || '*', 
+        origin: process.env.CORS_ORIGIN || '*',
         methods: ["GET", "POST", "PUT", "DELETE"]
     },
     pingTimeout: 60000 // Jaga koneksi tetap hidup
@@ -117,7 +166,7 @@ app.locals.io = io;
 // Socket.IO Connection Handler
 io.on('connection', (socket) => {
     // console.log(`👤 Admin terkoneksi: ${socket.id}`);
-    
+
     // Contoh untuk join room, e.g., 'admin-dashboard'
     socket.on('joinAdmin', (adminId) => {
         socket.join('admin-dashboard');

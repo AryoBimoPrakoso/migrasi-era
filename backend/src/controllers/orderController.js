@@ -4,25 +4,59 @@ const { db, admin } = require('../config/db');
 const { NotFoundError, BadRequestError } = require('../utils/customError');
 const { body, validationResult } = require('express-validator');
 const ExcelJS = require('exceljs');
+const asyncHandler = require('../utils/asyncHandler');
+const { successResponse, paginatedResponse, createdResponse } = require('../utils/responseHelper');
+
 const ORDER_COLLECTION = 'orders';
 
 /**
- * Get all orders for admin
+ * Get all orders for admin with pagination and filtering
+ * GET /api/v1/admin/orders?limit=20&cursor=<lastDocId>&status=Pending
  */
-exports.getAllOrders = async (req, res, next) => {
-  try {
-    const snapshot = await db.collection(ORDER_COLLECTION).get();
-    const orders = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+exports.getAllOrders = asyncHandler(async (req, res, next) => {
+  // Pagination parameters
+  const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+  const cursor = req.query.cursor;
+  const status = req.query.status; // Filter by status
+  const sortBy = req.query.sortBy || 'createdAt';
+  const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc';
 
-    res.status(200).json(orders);
-  } catch (error) {
-    console.error('Error getting orders:', error);
-    next(error);
+  // Build query
+  let query = db.collection(ORDER_COLLECTION);
+
+  // Add status filter if provided
+  if (status) {
+    query = query.where('status', '==', status);
   }
-};
+
+  query = query.orderBy(sortBy, sortOrder).limit(limit + 1);
+
+  // If cursor provided, start after that document
+  if (cursor) {
+    const cursorDoc = await db.collection(ORDER_COLLECTION).doc(cursor).get();
+    if (cursorDoc.exists) {
+      query = query.startAfter(cursorDoc);
+    }
+  }
+
+  const snapshot = await query.get();
+  const docs = snapshot.docs;
+
+  // Check if there are more results
+  const hasMore = docs.length > limit;
+  const orders = docs.slice(0, limit).map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+
+  return paginatedResponse(res, orders, {
+    limit,
+    hasMore,
+    nextCursor: hasMore ? docs[limit - 1].id : null,
+    count: orders.length,
+    filter: status ? { status } : null
+  }, 'Orders berhasil diambil');
+});
 
 /**
  * Get order by ID

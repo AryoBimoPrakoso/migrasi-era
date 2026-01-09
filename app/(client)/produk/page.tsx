@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import bannerProduk from "@/public/assets/img/produk.jpg";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,6 +58,8 @@ const Produk = () => {
           src={bannerProduk}
           alt="Banner"
           className="h-[200px] md:h-[250px] w-full object-cover"
+          priority
+          placeholder="blur"
         />
       </div>
 
@@ -69,10 +71,11 @@ const Produk = () => {
               {/* IMAGE */}
               <Image
                 src={product.imageUrl}
-                alt="Dummy Produk"
-                className="w-full h-full object-cover rounded-md"
-                width={24}
-                height={24}
+                alt={product.name}
+                className="w-full h-48 md:h-56 object-cover rounded-md"
+                width={300}
+                height={300}
+                loading="lazy"
               />
 
               {/* TEXT */}

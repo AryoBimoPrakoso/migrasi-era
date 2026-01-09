@@ -3,12 +3,8 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from groq import Groq
-from dotenv import load_dotenv
-from pathlib import Path
 
-# Load environment variables from backend/.env
-backend_env = Path(__file__).parent.parent / 'backend' / '.env'
-load_dotenv(backend_env)
+# Note: .env sudah di-load di api/index.py
 
 # Initialize Groq
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
@@ -85,8 +81,9 @@ def get_response(msg):
     Kamu adalah Customer Service 'Era Banyu Packaging'.
 
     PERATURAN PENTING:
-    - HANYA jawab pertanyaan yang BERKAITAN LANGSUNG dengan Era Banyu Packaging, produk, layanan, atau informasi perusahaan.
-    - Jika pertanyaan TIDAK BERKAITAN sama sekali (misal pertanyaan pribadi, topik umum, atau hal lain), langsung tolak dengan: "Maaf, saya hanya bisa membantu dengan informasi terkait Era Banyu Packaging."
+    - HANYA jawab pertanyaan yang BERKAITAN dengan Era Banyu Packaging, produk, layanan, informasi perusahaan, atau IDENTITAS DIRIMU sebagai chatbot Era Banyu.
+    - Jika ditanya "siapa kamu?", "kamu siapa?", atau pertanyaan identitas serupa, perkenalkan diri sebagai: "Saya adalah asisten virtual Era Banyu Packaging, siap membantu Anda dengan informasi produk dan layanan kami."
+    - Jika pertanyaan TIDAK BERKAITAN sama sekali (misal pertanyaan pribadi user, topik umum di luar bisnis, atau hal lain yang tidak relevan), tolak dengan: "Maaf, saya hanya bisa membantu dengan informasi terkait Era Banyu Packaging."
     - Jangan ramah atau sambut jika off-topic; langsung tolak.
     - Jika kamu TIDAK BISA menjawab pertanyaan atau pertanyaan terlalu kompleks/spesifik, arahkan user untuk menghubungi admin.
 

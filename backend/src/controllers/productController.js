@@ -4,6 +4,9 @@ const { db, admin } = require("../config/db");
 const { NotFoundError, BadRequestError } = require("../utils/customError");
 const { body, validationResult } = require("express-validator");
 const { getStorage } = require("firebase-admin/storage");
+const asyncHandler = require("../utils/asyncHandler");
+const { successResponse, paginatedResponse, createdResponse } = require("../utils/responseHelper");
+
 const PRODUCT_COLLECTION = "products";
 
 const bucket = getStorage().bucket();
@@ -14,26 +17,61 @@ const bucket = getStorage().bucket();
 
 /**
  * Mengambil semua produk yang aktif (isActive: true) untuk tampilan publik.
- * GET /api/v1/products
+ * Mendukung pagination dan field projection untuk performa optimal.
+ * GET /api/v1/products?limit=20&cursor=<lastDocId>
  */
-exports.getPublicProducts = async (req, res, next) => {
-  try {
-    // Query hanya mengambil produk yang aktif
-    const snapshot = await db
-      .collection(PRODUCT_COLLECTION)
-      .where("isActive", "==", true)
-      .get();
+exports.getPublicProducts = asyncHandler(async (req, res, next) => {
+  // Pagination parameters
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100); // Max 100 items
+  const cursor = req.query.cursor;
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+  // Build query - Note: Removed orderBy to avoid composite index requirement
+  let query = db
+    .collection(PRODUCT_COLLECTION)
+    .where("isActive", "==", true)
+    .limit(limit + 1); // Fetch one extra to check if there's more
 
-    res.status(200).json(products);
-  } catch (error) {
-    next(error); // Teruskan ke error middleware
+  // If cursor provided, start after that document
+  if (cursor) {
+    const cursorDoc = await db.collection(PRODUCT_COLLECTION).doc(cursor).get();
+    if (cursorDoc.exists) {
+      query = query.startAfter(cursorDoc);
+    }
   }
-};
+
+  const snapshot = await query.get();
+  const docs = snapshot.docs;
+
+  // Check if there are more results
+  const hasMore = docs.length > limit;
+  const products = docs.slice(0, limit).map((doc) => ({
+    id: doc.id,
+    name: doc.data().name,
+    sku: doc.data().sku,
+    price: doc.data().price,
+    unit: doc.data().unit,
+    imageUrl: doc.data().imageUrl,
+    description: doc.data().description,
+    minOrderQuantity: doc.data().minOrderQuantity,
+    currentStock: doc.data().currentStock || 0,
+    material: doc.data().material,
+    size: doc.data().size,
+  }));
+
+  // Sort products by name on the server side after fetching
+  products.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  // Set cache headers for public products (cache for 5 minutes)
+  res.set('Cache-Control', 'public, max-age=300');
+
+  // Return paginated response
+  return paginatedResponse(res, products, {
+    limit,
+    hasMore,
+    nextCursor: hasMore ? docs[limit - 1].id : null,
+    count: products.length
+  }, 'Produk berhasil diambil');
+});
 
 // ===================================
 // ADMIN API: CRUD (Membutuhkan Token)
@@ -76,10 +114,10 @@ exports.createProduct = async (req, res, next) => {
     return next(
       new BadRequestError(
         "Validation failed: " +
-          errors
-            .array()
-            .map((err) => err.msg)
-            .join(", ")
+        errors
+          .array()
+          .map((err) => err.msg)
+          .join(", ")
       )
     );
   }
@@ -165,22 +203,47 @@ exports.createProduct = async (req, res, next) => {
 // 2. READ All (Admin View): GET /api/v1/admin/products
 /**
  * Mengambil semua produk (aktif dan non-aktif) untuk dashboard admin.
+ * Mendukung pagination dan sorting.
+ * GET /api/v1/admin/products?limit=20&cursor=<lastDocId>&sortBy=name
  */
-exports.getAllProductsAdmin = async (req, res, next) => {
-  try {
-    // Ambil semua produk, termasuk yang tidak aktif
-    const snapshot = await db.collection(PRODUCT_COLLECTION).get();
+exports.getAllProductsAdmin = asyncHandler(async (req, res, next) => {
+  // Pagination parameters
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100); // Max 100 items for admin
+  const cursor = req.query.cursor;
+  const sortBy = req.query.sortBy || 'createdAt';
+  const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc';
 
-    const products = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+  // Build query
+  let query = db
+    .collection(PRODUCT_COLLECTION)
+    .orderBy(sortBy, sortOrder)
+    .limit(limit + 1);
 
-    res.status(200).json(products);
-  } catch (error) {
-    next(error);
+  // If cursor provided, start after that document
+  if (cursor) {
+    const cursorDoc = await db.collection(PRODUCT_COLLECTION).doc(cursor).get();
+    if (cursorDoc.exists) {
+      query = query.startAfter(cursorDoc);
+    }
   }
-};
+
+  const snapshot = await query.get();
+  const docs = snapshot.docs;
+
+  // Check if there are more results
+  const hasMore = docs.length > limit;
+  const products = docs.slice(0, limit).map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  return paginatedResponse(res, products, {
+    limit,
+    hasMore,
+    nextCursor: hasMore ? docs[limit - 1].id : null,
+    count: products.length
+  }, 'Produk admin berhasil diambil');
+});
 
 // 3. READ One: GET /api/v1/admin/products/:id
 /**

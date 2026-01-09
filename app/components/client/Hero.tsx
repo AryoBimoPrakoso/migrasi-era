@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import Link from "next/link";
 import HeroLanding from "@/public/assets/img/hero.jpg";
 import { GoArrowUpRight } from "react-icons/go";
 
@@ -14,9 +15,12 @@ const Hero = () => {
           Packaging <br /> Beyond the <span className="text-primary">Box!</span>
         </h1>
         <div className="flex items-center gap-1">
-          <button className="bg-primary flex py-2 px-4 md:px-6 md:py-2 md:text-2xl font-reguler rounded-xl hover:drop-shadow-md duration-300 hover:brightness-75 items-center text-white">
+          <Link
+            href="/produk"
+            className="bg-primary flex py-2 px-4 md:px-6 md:py-2 md:text-2xl font-reguler rounded-xl hover:drop-shadow-md duration-300 hover:brightness-75 items-center text-white"
+          >
             Lihat produk <GoArrowUpRight />
-          </button>
+          </Link>
         </div>
       </div>
     </section>

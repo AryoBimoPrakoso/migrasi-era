@@ -2,6 +2,7 @@
 import { getApi } from "@/lib/apiClient";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { use, useEffect, useState } from "react";
 import iconWhatsapp from "@/public/assets/svg/ic_round-whatsapp.svg";
 
@@ -27,6 +28,7 @@ const formatPriceIDR = (price: number) =>
 
 const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params);
+  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +73,10 @@ const ProductDetail = ({ params }: { params: Promise<{ id: string }> }) => {
           {/* Back button + isi */}
           <div className="p-8 lg:p-12">
             {/* BACK BUTTON */}
-            <button className="flex items-center gap-3 text-lg font-medium mb-8 hover:text-gray-600 transition">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-3 text-lg font-medium mb-8 hover:text-gray-600 transition cursor-pointer"
+            >
               <ArrowLeft /> {product.name}
             </button>
 

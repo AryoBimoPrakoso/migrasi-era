@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ikonChatbot from "@/public/assets/img/chat.png";
+import { CHATBOT_API_URL } from "@/lib/constants";
 
-// API endpoint chatbot
-const CHATBOT_API_URL = "https://chatbot-era-banyu.vercel.app/predict";
+// API endpoint chatbot (uses environment variable)
+const CHATBOT_PREDICT_URL = `${CHATBOT_API_URL}/predict`;
 
 type Message = {
   id: number;
@@ -111,7 +112,7 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(CHATBOT_API_URL, {
+      const response = await fetch(CHATBOT_PREDICT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

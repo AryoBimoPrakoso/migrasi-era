@@ -1,10 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from chat import get_response
+import sys
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Add parent directory to path untuk import chat.py
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Load environment from backend/.env
+backend_env = Path(__file__).parent.parent.parent / 'backend' / '.env'
+print(f"Loading .env from: {backend_env} (exists: {backend_env.exists()})")
+load_dotenv(backend_env)
+
+from chat import get_response
 
 app = FastAPI()
 

@@ -43,9 +43,8 @@ const Navbar = () => {
     <>
       {/* Navbar */}
       <div
-        className={`sticky top-0 w-full bg-white z-[999] transition-shadow duration-300 ${
-          shadow ? "shadow-md" : ""
-        }`}
+        className={`sticky top-0 w-full bg-white z-[999] transition-shadow duration-300 ${shadow ? "shadow-md" : ""
+          }`}
       >
         <div className="flex px-8 md:px-14 py-4 justify-between items-center">
           <Link href="/">
@@ -131,4 +130,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar);

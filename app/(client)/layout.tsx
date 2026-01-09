@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 // Komponen
 import Navbar from "../components/client/Navbar";
-import Chatbot from "../components/client/Chatbot";
 import Footer from "../components/client/Footer";
+import Chatbot from "../components/client/Chatbot";
 
 export const metadata: Metadata = {
   title: "Era Banyu Segara",
@@ -27,3 +27,4 @@ export default function ClientLayout({
     </>
   );
 }
+

@@ -1,12 +1,37 @@
 import { API_BASE_URL } from './constants';
 
+// Simple in-memory cache for GET requests
+const cache = new Map<string, { data: unknown; timestamp: number }>();
+const CACHE_TTL = 30000; // 30 seconds cache TTL
+
+/**
+ * Clear cache for a specific endpoint or all cache
+ */
+export function clearCache(endpoint?: string) {
+    if (endpoint) {
+        const keysToDelete = Array.from(cache.keys()).filter(key => key.startsWith(endpoint));
+        keysToDelete.forEach(key => cache.delete(key));
+    } else {
+        cache.clear();
+    }
+}
+
 /**
  * Fungsi utilitas untuk melakukan panggilan GET ke API backend.
  * @param endpoint - Endpoint API relatif (misal: 'products', 'orders/123').
- * @param body - Data yang akan dikirim (object)
  * @param requireAuth - Apakah endpoint memerlukan auth (default false).
+ * @param useCache - Apakah menggunakan cache (default true).
  */
-export async function getApi(endpoint: string, requireAuth: boolean = false) {
+export async function getApi(endpoint: string, requireAuth: boolean = false, useCache: boolean = true) {
+    // Check cache first
+    const cacheKey = `${endpoint}-${requireAuth}`;
+    if (useCache) {
+        const cached = cache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+            return cached.data;
+        }
+    }
+
     // Membangun URL lengkap
     const url = `${API_BASE_URL}/${endpoint}`;
 
@@ -32,7 +57,14 @@ export async function getApi(endpoint: string, requireAuth: boolean = false) {
             throw new Error(errorData.error || `Gagal mengambil data. Status: ${response.status}`);
         }
 
-        return response.json();
+        const data = await response.json();
+
+        // Store in cache
+        if (useCache) {
+            cache.set(cacheKey, { data, timestamp: Date.now() });
+        }
+
+        return data;
 
     } catch (error) {
         console.error("Error API Call:", error);
