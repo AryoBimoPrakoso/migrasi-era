@@ -40,7 +40,7 @@ export async function getApi(endpoint: string, requireAuth: boolean = false, use
     };
 
     if (requireAuth) {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -81,7 +81,7 @@ export async function postApi(endpoint: string, body: any, requireAuth: boolean 
     };
 
     if (requireAuth) {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -117,7 +117,7 @@ export async function deleteApi(endpoint: string, requireAuth: boolean = false) 
     };
 
     if (requireAuth) {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -150,7 +150,7 @@ export async function putApi(endpoint: string, body: any, requireAuth: boolean =
     };
 
     if (requireAuth) {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }

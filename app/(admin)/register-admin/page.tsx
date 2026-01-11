@@ -31,7 +31,7 @@ export default function RegisterAdminPage() {
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
 
   useEffect(() => {
-    const adminDataString = localStorage.getItem("adminData");
+    const adminDataString = sessionStorage.getItem("adminData");
 
     if (!adminDataString) {
       router.push("/login");

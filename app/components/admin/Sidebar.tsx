@@ -34,9 +34,9 @@ const handleLogout = () => {
     },
   }).then((result) => {
     if (result.isConfirmed) {
-      // Hapus token & data admin dari localStorage
-      localStorage.removeItem("token");
-      localStorage.removeItem("adminData");
+      // Hapus token & data admin dari sessionStorage
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("adminData");
 
       // Optional: SweetAlert success
       Swal.fire({

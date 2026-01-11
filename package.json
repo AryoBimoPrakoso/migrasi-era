@@ -10,6 +10,7 @@
     "server": "node app/backend/server.js"
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "firebase": "^12.6.0",
     "lucide-react": "^0.560.0",
     "next": "^15.1.9",

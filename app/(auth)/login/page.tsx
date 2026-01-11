@@ -35,11 +35,11 @@ const Login = () => {
       });
 
       // jika berhasil simpan token di localStrorage
-      localStorage.setItem("token", response.token);
+      sessionStorage.setItem("token", response.token);
 
       // simpan data admin
       if (response.admin) {
-        localStorage.setItem("adminData", JSON.stringify(response.admin));
+        sessionStorage.setItem("adminData", JSON.stringify(response.admin));
       }
 
       router.push("/dashboard");

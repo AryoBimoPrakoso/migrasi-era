@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ikonChatbot from "@/public/assets/img/chat.png";
 import { CHATBOT_API_URL } from "@/lib/constants";
+import { SendHorizontal } from "lucide-react";
 
 // API endpoint chatbot (uses environment variable)
 const CHATBOT_PREDICT_URL = `${CHATBOT_API_URL}/predict`;
@@ -32,7 +33,8 @@ const parseMarkdownLinks = (text: string): React.ReactNode[] => {
     const linkUrl = match[2];
 
     // Check if it's an internal link (localhost or relative path)
-    const isInternal = linkUrl.includes("localhost:3000") || linkUrl.startsWith("/");
+    const isInternal =
+      linkUrl.includes("localhost:3000") || linkUrl.startsWith("/");
 
     if (isInternal) {
       // Convert localhost URL to relative path for Next.js Link
@@ -81,10 +83,7 @@ const Chatbot = () => {
       id: 1,
       sender: "bot",
       text: "Halo! Ada yang bisa saya bantu tentang produk Era Banyu Packaging?",
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: "",
     },
   ]);
 
@@ -158,8 +157,11 @@ const Chatbot = () => {
     <div className="fixed flex items-end gap-1 md:gap-4 bottom-0 right-0 mb-8 mr-2 md:mr-8 z-50 pointer-events-none">
       {/* UI ChatBot */}
       <div
-        className={`mt-4 w-[300px] md:w-[350px] h-[450px] md:h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col border pointer-events-auto transition-all duration-300 ${chat ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-          }`}
+        className={`mt-4 w-[300px] md:w-[350px] h-[450px] md:h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col border pointer-events-auto transition-all duration-300 ${
+          chat
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
       >
         {/* Header */}
         <div className="p-4 bg-white border-b flex items-center gap-3">
@@ -168,9 +170,13 @@ const Chatbot = () => {
         </div>
 
         {/* Availability */}
-        <div className="p-3 flex items-center gap-2 text-xs text-gray-500 justify-center">
-          <span>⏱</span>
-          <p>Tersedia Senin–Jumat, 08.00–17.00 WIB</p>
+        <div className="p-3 flex flex-col items-center gap-1 text-center text-xs text-gray-500 justify-center">
+          <p className="flex gap-1">
+            <span>⏱</span>Admin Tersedia Senin–Jumat, 08.00–17.00 WIB.
+          </p>
+          <p>
+            Hubungi <Link href="https://wa.me/6289501349416" className="text-blue-500 underline">WhatsApp</Link>
+          </p>
         </div>
 
         {/* Chat Messages */}
@@ -178,15 +184,17 @@ const Chatbot = () => {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-[75%] p-3 rounded-xl text-sm shadow-sm relative
-                    ${msg.sender === "user"
-                    ? "bg-gray-300 text-gray-900"
-                    : "bg-white text-gray-700"
-                  }
+                    ${
+                      msg.sender === "user"
+                        ? "bg-gray-300 text-gray-900"
+                        : "bg-white text-gray-700"
+                    }
                   `}
               >
                 {/* Render text with parsed Markdown links */}
@@ -203,9 +211,21 @@ const Chatbot = () => {
             <div className="flex justify-start">
               <div className="bg-white p-3 rounded-xl text-sm shadow-sm">
                 <div className="flex gap-1">
-                  <span className="animate-bounce">●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
+                  <span className="animate-bounce text-gray-300 text-md">
+                    ●
+                  </span>
+                  <span
+                    className="animate-bounce text-gray-300 text-md"
+                    style={{ animationDelay: "0.1s" }}
+                  >
+                    ●
+                  </span>
+                  <span
+                    className="animate-bounce text-gray-300 text-md"
+                    style={{ animationDelay: "0.2s" }}
+                  >
+                    ●
+                  </span>
                 </div>
               </div>
             </div>
@@ -227,9 +247,9 @@ const Chatbot = () => {
           <button
             onClick={sendMessage}
             disabled={isLoading}
-            className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ▶
+            <SendHorizontal />
           </button>
         </div>
       </div>

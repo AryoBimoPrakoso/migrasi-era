@@ -12,8 +12,8 @@ const NavbarAdmin = () => {
   const [role, setRole] = useState<string>("");
 
   useEffect(() => {
-    // ambil data dari localstorage
-    const adminDataString = localStorage.getItem("adminData");
+    // ambil data dari sessionStorage
+    const adminDataString = sessionStorage.getItem("adminData");
 
     if (adminDataString) {
       try {

@@ -170,7 +170,7 @@ export default function LaporanPage() {
     // Note: Jika backend butuh filter spesifik saat export, Anda mungkin perlu menyesuaikan logic ini
     // Tapi jika export frontend (filter data yang ada), gunakan filteredOrders
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"
