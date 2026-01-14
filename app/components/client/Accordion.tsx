@@ -34,12 +34,17 @@ export const StaticQuestions: Pertanyaan[] = [
   {
     id: 5,
     pertanyaan: "Metode pembayaran apa saja yang didukung?",
-    jawaban: "Anda bisa mengisi bagian ini dengan metode pembayaran yang sebenarnya digunakan, misalnya transfer bank atau e-wallet",
+    jawaban: "Pembayaran yang dapat dilakukan melalui Transfer, QRIS, maupun COD",
   },
   {
     id: 6,
     pertanyaan: "Apakah saya bisa membatalkan pesanan?",
-    jawaban: "Ya, di contoh ini pesanan bisa dibatalkan sebelum proses produk dimulai. Silakan sesuai dengan kebijakan asli anda",
+    jawaban: "Tidak, untuk pesanan anda tidak dapat dibatalkan.",
+  },
+  {
+    id: 7,
+    pertanyaan: "Berapa lama jatuh tempo pembayaran?",
+    jawaban: "Jatuh tempo pembayaran dari 2 minggu atau 4 minggu setelah pemesanan.",
   },
 ];
 
