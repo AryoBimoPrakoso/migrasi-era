@@ -93,6 +93,7 @@ const Chatbot = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Mengirim input pengguna dan menerima respon dari chatbot.
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 

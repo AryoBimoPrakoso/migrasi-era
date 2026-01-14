@@ -9,26 +9,27 @@ export interface Pertanyaan {
   jawaban: string;
 }
 
-export const DummyPertanyaan: Pertanyaan[] = [
+// Static pertanyaan FAQ
+export const StaticQuestions: Pertanyaan[] = [
   {
     id: 1,
-    pertanyaan: "Apa itu produk ini?",
-    jawaban: "Ini adalah penjelasan produk yang sangat bagus",
+    pertanyaan: "Menjual Apa Saja?",
+    jawaban: "Menjual berbagai macam produk kemasan, seperti Packing Carton Box, Strapping Band, Paper Pallet, Slip Sheet, Paper Angle Board, Strecth Film, Tape, dan Impra Board Box.",
   },
   {
     id: 2,
-    pertanyaan: "Berapa harga produknya?",
-    jawaban: "Harga mulai dari Rp 150rb",
+    pertanyaan: "Minimum Pesanan?",
+    jawaban: "Minimum pesanan tergantung pada setiap produk, yang dapat dilihat pada deskripsi produk.",
   },
   {
     id: 3,
     pertanyaan: "Apakah bisa COD?",
-    jawaban: "Bisa! Kami support COD di seluruh Indonesia",
+    jawaban: "Bisa! Kami support pembayaran COD.",
   },
   {
     id: 4,
     pertanyaan: "Berapa lama proses pengerjaan?",
-    jawaban: "Waktu pengerjaan ditulis 1-3 hari kerja dan bisa diubah sesuai kebutuhan",
+    jawaban: "Waktu pengerjaan 10 hari kerja.",
   },
   {
     id: 5,
@@ -50,7 +51,7 @@ const Accordion = () => {
 
   return (
     <div className="w-full">
-      {DummyPertanyaan.map((ask, index) => (
+      {StaticQuestions.map((ask, index) => (
         <div key={index} className="py-3">
           <button
             onClick={() => toggle(index)}

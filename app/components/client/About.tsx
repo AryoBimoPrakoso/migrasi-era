@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import layananImg from "@/public/assets/img/service.jpg";
 
+// Static daftar layanan
 const daftarLayananArray = [
   "Pengemasan industri",
   "Pengemasan otomotif, alat musik, dan peralatan",

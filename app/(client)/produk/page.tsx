@@ -4,7 +4,6 @@ import bannerProduk from "@/public/assets/img/produk.jpg";
 import Image from "next/image";
 import Link from "next/link";
 
-// Data Dummy
 import { getApi } from "@/lib/apiClient";
 
 interface Product {
@@ -20,6 +19,10 @@ interface Product {
   unit: number;
 }
 
+// Untuk skeleton loading produk
+const skeletonArray = Array.from({ length: 8 });
+
+
 const formatPriceIDR = (price: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -32,6 +35,7 @@ const Produk = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Mengambil data dari API
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
@@ -66,7 +70,14 @@ const Produk = () => {
       {/* Grid Produk */}
       <div className="container mx-auto py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-8 justify-center">
-          {products.map((product) => (
+          {isLoading ? skeletonArray.map((_, index) => (
+            <div key={index} className="bg-[#E6E6E6] w-full rounded-xl shadow-sm p-3 flex flex-col gap-2 md:gap-4">
+              <div className="w-full h-48 md:h-56 bg-[#D9D9D9] rounded-md animation-pulse bg"></div>
+              <div className="w-full rounded-full animation-pulse bg-[#D9D9D9] "></div>
+                
+            </div>
+          ))
+          : products.map((product) => (
             <div className="bg-[#E6E6E6] w-full rounded-xl shadow-sm p-3 flex flex-col gap-2 md:gap-4" key={product.id}>
               {/* IMAGE */}
               <Image
@@ -91,7 +102,8 @@ const Produk = () => {
                 </button>
               </Link>
             </div>
-          ))}
+          ))
+        }
         </div>
       </div>
     </div>
