@@ -12,7 +12,7 @@ interface ProductFormEdit {
   sku: string;
   price: string | number;
   stock: string | number;
-  minOrder: string | number;
+  minOrderQuantity: string | number;
   unit: string;
   description: string;
   imageUrl: string;
@@ -28,7 +28,7 @@ const EditProduct = ({ params }: { params: Promise<{ id: string }> }) => {
     sku: "",
     price: 0,
     stock: 0,
-    minOrder: 0,
+    minOrderQuantity: 0,
     unit: "",
     description: "",
     imageUrl: "",
@@ -51,7 +51,7 @@ const EditProduct = ({ params }: { params: Promise<{ id: string }> }) => {
           sku: data.sku || "",
           price: data.price || 0,
           stock: data.stock || 0,
-          minOrder: data.minOrder || 0,
+          minOrderQuantity: data.minOrder || 0,
           unit: data.unit || "",
           description: data.description || "",
           imageUrl: data.imageUrl || "",
@@ -117,7 +117,7 @@ const EditProduct = ({ params }: { params: Promise<{ id: string }> }) => {
         sku: formData.sku,
         price: Number(formData.price),
         currentStock: Number(formData.stock),
-        minOrderQuantity: Number(formData.minOrder),
+        minOrderQuantity: Number(formData.minOrderQuantity),
         unit: formData.unit,
         description: formData.description,
         imageUrl: formData.imageUrl,
@@ -163,7 +163,7 @@ const EditProduct = ({ params }: { params: Promise<{ id: string }> }) => {
         >
           <FaArrowLeft size={20} />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800">Tambah Produk Baru</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Edit Produk</h1>
       </div>
 
       {/* ERROR ALERT */}
@@ -305,8 +305,8 @@ const EditProduct = ({ params }: { params: Promise<{ id: string }> }) => {
               <input
                 required
                 type="number"
-                name="minOrder"
-                value={formData.minOrder}
+                name="minOrderQuantity"
+                value={formData.minOrderQuantity}
                 onChange={handleChange}
                 min="1"
                 className="w-full border border-gray-300 p-2 rounded-md outline-none focus:border-black transition"

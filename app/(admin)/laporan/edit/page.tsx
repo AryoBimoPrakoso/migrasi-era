@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getApi, postApi, putApi } from "@/lib/apiClient"; // Gunakan helper yang sudah ada
+import { getApi, postApi, putApi } from "@/lib/apiClient";
 import { CircleAlert } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -37,6 +37,18 @@ const EditLaporanContent = () => {
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
 
+  // Helper untuk format tanggal ke YYYY-MM-DD (Wajib untuk input type="date")
+  const formatDateForInput = (dateString: any) => {
+    if (!dateString) return "";
+    try {
+      const d = new Date(dateString);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().split("T")[0];
+    } catch (e) {
+      return "";
+    }
+  };
+
   // 1. Fetch Data jika Mode Edit
   useEffect(() => {
     if (id) {
@@ -44,20 +56,25 @@ const EditLaporanContent = () => {
         setFetching(true);
         try {
           // GET /api/v1/admin/orders/:id
-          const data = await getApi(`admin/orders/${id}`, true);
+          const response = await getApi(`admin/orders/${id}`, true);
+          
+          // [PERBAIKAN 1]: Ambil data dari property .data jika ada wrapper
+          const data = response.data || response;
 
           setForm({
             nama: data.nama || "",
             kontak: data.kontak || "",
             detail: data.detail || "",
             jumlah: data.jumlah || "",
-            total: data.total || "", // Load sebagai number/string
-            tanggalPesan: data.tanggalPesan || "",
-            tanggalPembayaran: data.tanggalPembayaran || "",
+            total: data.total || "",
+            // [PERBAIKAN 2]: Format tanggal agar terbaca di input date
+            tanggalPesan: formatDateForInput(data.tanggalPesan),
+            tanggalPembayaran: formatDateForInput(data.tanggalPembayaran),
             status: data.status || "Diproses",
           });
         } catch (err: any) {
-          setError("Gagal memuat data order: " + err.message);
+          console.error(err);
+          setError("Gagal memuat data order: " + (err.message || "Unknown error"));
         } finally {
           setFetching(false);
         }
@@ -82,13 +99,13 @@ const EditLaporanContent = () => {
     try {
       const payload = {
         ...form,
-        total: Number(form.total) || 0, // Pastikan kirim Number ke backend
+        total: Number(form.total) || 0,
       };
 
       if (id) {
         // Mode Edit: PUT
         await putApi(`admin/orders/${id}`, payload, true);
-        Swal.fire({
+        await Swal.fire({
           title: "Berhasil!",
           text: "Data berhasil diperbarui",
           icon: "success",
@@ -96,17 +113,22 @@ const EditLaporanContent = () => {
       } else {
         // Mode Buat: POST
         await postApi(`admin/orders`, payload, true);
-        Swal.fire({
+        await Swal.fire({
           title: "Berhasil!",
           text: "Data berhasil ditambahkan!",
           icon: "success",
         });
       }
-
+      router.refresh();
       router.push("/laporan");
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Terjadi kesalahan saat menyimpan.");
+      Swal.fire({
+        title: "Gagal!",
+        text: err.message || "Terjadi kesalahan",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }

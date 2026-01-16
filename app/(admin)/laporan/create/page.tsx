@@ -74,6 +74,7 @@ export default function CreateLaporanPage() {
         text: "Laporan berhasil ditambahkan",
         icon: "success",
       });
+      router.refresh();
       router.push("/laporan"); // Kembali ke list laporan
     } catch (err: any) {
       console.error(err);

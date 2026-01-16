@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, admin } from '@/lib/db'; // Import admin untuk timestamp
 import { verifyAdmin } from '@/lib/auth';
 
+// --- GET: Ambil Semua Produk ---
 export async function GET(request) {
   try {
-    // Verify admin token
     const authHeader = request.headers.get('authorization');
     verifyAdmin(authHeader);
 
-    // Get all products from Firestore
     const productsSnapshot = await db.collection('products').get();
     const products = [];
 
@@ -31,3 +30,63 @@ export async function GET(request) {
     );
   }
 }
+
+// --- POST: Tambah Produk Baru ---
+export async function POST(request) {
+  try {
+    // 1. Verifikasi Admin
+    const authHeader = request.headers.get('authorization');
+    verifyAdmin(authHeader);
+
+    const body = await request.json();
+
+    // 2. Validasi Input
+    if (!body.name || !body.sku || !body.price) {
+      return NextResponse.json(
+        { message: "Nama, SKU, dan Harga wajib diisi" },
+        { status: 400 }
+      );
+    }
+
+    // 3. Persiapkan Data
+    // PENTING: Mapping nama field agar sesuai dengan yang dibaca frontend (stock & minOrder)
+    const newProductData = {
+      name: body.name,
+      sku: body.sku,
+      price: Number(body.price),
+      
+      // Mapping: Frontend kirim 'currentStock', Database simpan 'stock'
+      stock: Number(body.currentStock) || 0, 
+      
+      // Mapping: Frontend kirim 'minOrderQuantity', Database simpan 'minOrder'
+      minOrderQuantity: Number(body.minOrderQuantity) || 1, 
+      
+      unit: body.unit || 'pcs',
+      description: body.description || '',
+      imageUrl: body.imageUrl || '',
+      material: body.material || '',
+      size: body.size || '',
+      
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // 4. Simpan ke Firestore
+    const docRef = await db.collection('products').add(newProductData);
+
+    return NextResponse.json(
+      { 
+        message: "Produk berhasil ditambahkan", 
+        data: { id: docRef.id, ...newProductData } 
+      },
+      { status: 201 }
+    );
+
+  } catch (error) {
+    console.error("POST Product Error:", error);
+    return NextResponse.json(
+      { message: "Gagal menyimpan produk", error: error.message },
+      { status: 500 }
+    );
+  }
+} 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getApi, deleteApi } from "@/lib/apiClient";
 import { Plus, Download, Trash2, Edit } from "lucide-react";
 import Swal from "sweetalert2";
+import { API_BASE_URL } from "@/lib/constants";
 
 // Komponen filter
 import MonthFilter from "@/app/components/admin/MonthFilter";
@@ -51,7 +52,7 @@ export default function LaporanPage() {
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
-      const response = await getApi("admin/orders", true);
+      const response = await getApi(`admin/orders?t=${Date.now()}`, true);
       const data = response.data || response;
       setOrders(data);
     } catch (error) {
@@ -166,21 +167,23 @@ export default function LaporanPage() {
   };
 
   const handleExport = async () => {
-    // ... logic export Anda ...
-    // Note: Jika backend butuh filter spesifik saat export, Anda mungkin perlu menyesuaikan logic ini
-    // Tapi jika export frontend (filter data yang ada), gunakan filteredOrders
     try {
       const token = sessionStorage.getItem("token");
+      
+      // 2. GANTI FETCH URL INI
+      // DARI: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"
+      // KE: API_BASE_URL
+      
       const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"
-        }/admin/orders/export/excel`,
+        `${API_BASE_URL}/admin/orders/export/excel`, 
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       if (!response.ok) throw new Error("Gagal export excel");
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -193,7 +196,7 @@ export default function LaporanPage() {
       console.error(error);
       Swal.fire({
         title: "Gagal!",
-        text: "Gagal mengunduh Excel",
+        text: "Gagal mengunduh Excel (Pastikan server berjalan)",
         icon: "error",
       });
     }

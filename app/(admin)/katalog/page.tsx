@@ -29,7 +29,7 @@ const Katalog = () => {
     setIsLoading(true);
     try {
       // Panggil API GET /admin/products
-      const response = await getApi("admin/products", true);
+      const response = await getApi(`admin/products?t=${Date.now()}`, true);
       const dataProduk = response.data || response;
       setProducts(dataProduk);
     } catch (err: any) {

@@ -118,6 +118,7 @@ const CreateKatalogPage = () => {
         text: "Produk berhasil ditambahkan.",
         icon: "success",
       });
+      router.refresh();
       router.push("/katalog");
     } catch (err: any) {
       console.error(err);
