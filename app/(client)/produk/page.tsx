@@ -22,7 +22,6 @@ interface Product {
 // Untuk skeleton loading produk
 const skeletonArray = Array.from({ length: 8 });
 
-
 const formatPriceIDR = (price: number) =>
   new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -70,40 +69,58 @@ const Produk = () => {
       {/* Grid Produk */}
       <div className="container mx-auto py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-8 justify-center">
-          {isLoading ? skeletonArray.map((_, index) => (
-            <div key={index} className="bg-[#E6E6E6] w-full rounded-xl shadow-sm p-3 flex flex-col gap-2 md:gap-4">
-              <div className="w-full h-48 md:h-56 bg-[#D9D9D9] rounded-md animation-pulse bg"></div>
-              <div className="w-full rounded-full animation-pulse bg-[#D9D9D9] "></div>
-                
-            </div>
-          ))
-          : products.map((product) => (
-            <div className="bg-[#E6E6E6] w-full rounded-xl shadow-sm p-3 flex flex-col gap-2 md:gap-4" key={product.id}>
-              {/* IMAGE */}
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-48 md:h-56 object-cover rounded-md"
-                width={300}
-                height={300}
-                loading="lazy"
-              />
+          {isLoading
+            ? skeletonArray.map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white w-full rounded-xl shadow-sm p-3 flex flex-col gap-3 md:gap-4 border border-gray-100"
+                >
+                  {/* Image Skeleton */}
+                  <div className="w-full h-48 md:h-56 bg-gray-200 rounded-md animate-pulse"></div>
 
-              {/* TEXT */}
-              <div>
-                <h2 className="text-xs lg:text-base font-medium">{product.name}</h2>
-                <h2 className="text-sm lg:text-lg font-semibold">Mulai {formatPriceIDR(product.price)} </h2>
-              </div>
+                  {/* Title Skeleton */}
+                  <div className="w-3/4 h-5 bg-gray-200 rounded-full animate-pulse"></div>
 
-              {/* BUTTON */}
-              <Link href={`/produk/${product.id}`}>
-                <button className="w-full py-1 lg:py-2 bg-primary text-white hover:brightness-75 duration-300 rounded-md text-sm">
-                  Lihat Produk
-                </button>
-              </Link>
-            </div>
-          ))
-        }
+                  {/* Description/Body Skeleton */}
+                  <div className="flex flex-col gap-2">
+                    <div className="w-full h-4 bg-gray-200 rounded-md animate-pulse"></div>
+                    <div className="w-5/6 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+                  </div>
+                </div>
+              ))
+            : products.map((product) => (
+                <div
+                  className="bg-[#E6E6E6] w-full rounded-xl shadow-sm p-3 flex flex-col gap-2 md:gap-4"
+                  key={product.id}
+                >
+                  {/* IMAGE */}
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-48 md:h-56 object-cover rounded-md"
+                    width={300}
+                    height={300}
+                    loading="lazy"
+                  />
+
+                  {/* TEXT */}
+                  <div>
+                    <h2 className="text-xs lg:text-base font-medium">
+                      {product.name}
+                    </h2>
+                    <h2 className="text-sm lg:text-lg font-semibold">
+                      Mulai {formatPriceIDR(product.price)}{" "}
+                    </h2>
+                  </div>
+
+                  {/* BUTTON */}
+                  <Link href={`/produk/${product.id}`}>
+                    <button className="w-full py-1 lg:py-2 bg-primary text-white hover:brightness-75 duration-300 rounded-md text-sm">
+                      Lihat Produk
+                    </button>
+                  </Link>
+                </div>
+              ))}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ikonChatbot from "@/public/assets/img/chat.png";
 import { CHATBOT_API_URL } from "@/lib/constants";
 import { SendHorizontal } from "lucide-react";
+import TextareaAutosize from "react-textarea-autosize";
 
 // API endpoint chatbot (uses environment variable)
 const CHATBOT_PREDICT_URL = `${CHATBOT_API_URL}/predict`;
@@ -158,14 +159,14 @@ const Chatbot = () => {
     <div className="fixed flex items-end gap-1 md:gap-4 bottom-0 right-0 mb-8 mr-2 md:mr-8 z-50 pointer-events-none">
       {/* UI ChatBot */}
       <div
-        className={`mt-4 w-[300px] md:w-[350px] h-[450px] md:h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col border pointer-events-auto transition-all duration-300 ${
+        className={`mt-4 w-[300px] md:w-[350px] h-[450px] md:h-[500px] bg-[#f8f8f8] rounded-3xl shadow-xl overflow-hidden flex flex-col pointer-events-auto transition-all duration-300 ${
           chat
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
         {/* Header */}
-        <div className="p-4 bg-white border-b flex items-center gap-3">
+        <div className="p-4 bg-white border-b border-gray-300 flex items-center gap-3">
           <div className="text-xl">🤖</div>
           <h2 className="font-semibold text-lg">Chatbot Era Banyu</h2>
         </div>
@@ -176,7 +177,14 @@ const Chatbot = () => {
             <span>⏱</span>Admin tersedia Senin–Jumat, 08.00–17.00 WIB.
           </p>
           <p>
-            Hubungi <Link href="https://wa.me/6281289505095" className="text-blue-500 underline" target="_blank">WhatsApp</Link>
+            Hubungi{" "}
+            <Link
+              href="https://wa.me/6281289505095"
+              className="text-blue-500 underline"
+              target="_blank"
+            >
+              WhatsApp
+            </Link>
           </p>
         </div>
 
@@ -236,15 +244,16 @@ const Chatbot = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-3 bg-white flex items-center gap-3 border-t">
-          <input
+        <div className="p-3 bg-white flex items-center gap-3 border-t border-gray-300">
+          <TextareaAutosize
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Ketik pesan..."
             disabled={isLoading}
-            className="flex-1 px-4 py-2 rounded-full bg-gray-100 text-sm outline-none disabled:opacity-50"
+            className="flex-1 resize-none px-4 py-2 rounded-md bg-gray-100 text-sm outline-none disabled:opacity-50"
           />
+         
           <button
             onClick={sendMessage}
             disabled={isLoading}

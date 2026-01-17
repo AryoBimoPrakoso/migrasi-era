@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
+import ClientShell from "../components/client/ClientShell";
 
-// Komponen
-import Navbar from "../components/client/Navbar";
-import Footer from "../components/client/Footer";
-import Chatbot from "../components/client/Chatbot";
 
 export const metadata: Metadata = {
   title: "Era Banyu Segara",
@@ -20,10 +17,7 @@ export default function ClientLayout({
 }>) {
   return (
     <>
-      <Navbar />
-      {children}
-      <Chatbot />
-      <Footer />
+      <ClientShell>{children}</ClientShell>
     </>
   );
 }
