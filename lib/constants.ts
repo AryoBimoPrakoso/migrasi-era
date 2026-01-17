@@ -4,7 +4,7 @@
 
 
 // CHATBOT_API_URL: Menunjuk ke lokasi server chatbot Python
-export const CHATBOT_API_URL = process.env.NEXT_PUBLIC_CHATBOT_API_URL || 'https://chatbot-erabanyu.vercel.app';
+export const CHATBOT_API_URL = 'https://chatbot-erabanyu.vercel.app';
 
 // Anda bisa menambahkan konstanta lain di sini, seperti
 // export const PAGINATION_LIMIT = 10;

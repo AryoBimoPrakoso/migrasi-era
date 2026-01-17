@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db, admin } from '@lib/db';
+import { db, admin } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { BadRequestError, InternalServerError } from '@/lib/customError';
